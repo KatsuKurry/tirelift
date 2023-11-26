@@ -8,7 +8,7 @@
 //Height Button Save
 #define buttonPin 17
 
-//
+//go to distance
 #define golocationPin 15
 
 //Relay Pins(Up)
@@ -27,12 +27,10 @@
 //byte size to store int 
 #define EEPROM_SIZE 1
 
+//mutatable variables
 long duration;
-int distanceCm;
-int saveddistanceCM;
-
-String distanceCmPrint;
-String saveddistanceCmPrint;
+int distanceCm = 0;
+int saveddistanceCM = 0;
 
 LiquidCrystal_I2C lcd(0x27, 20, 4); // I2C address 0x27, 20 column and 4 rows
 
@@ -51,7 +49,6 @@ void IRAM_ATTR moveActuator(){
   while(saveddistanceCM < distanceCm){ //turn on second group of relays
     digitalWrite(downRelay, HIGH);
   }
-
 }
 
 void IRAM_ATTR reset(){
@@ -97,8 +94,8 @@ void loop() {
   // Calculate the distance
   distanceCm = duration * SOUND_SPEED/2;
 
-  distanceCmPrint = String(distanceCm);
-  saveddistanceCmPrint = String(saveddistanceCM);
+  String distanceCmPrint = String(distanceCm);
+  String saveddistanceCmPrint = String(saveddistanceCM);
 
   // Prints the distance in the LCD
   lcd.setCursor(0, 0);            // move cursor the first row
