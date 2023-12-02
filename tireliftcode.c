@@ -2,24 +2,30 @@
 #include <EEPROM.h>
 
 //Ultra-Sonic Sensor
-#define trigPin 5
-#define echoPin 18
+#define TRIGPIN 5
+#define ECHOPIN 18
 
 //Height Button Save
-#define buttonPin 17
+#define BUTTONPIN 17
 
 //go to distance
-#define golocationPin 15
+#define GOLOCATIONPIN 15
 
 //Relay Pins(Up)
-#define upRelay 4
+#define UPRELAY 4
 
 //Relay Pins(Down)
-#define downRelay 2
+#define DOWNRELAY 2
 
-//Yes and No Buttons
-#define YES 12
-#define NO 13
+//To control the relays turned on and off on the module
+#define OPENRELAY1 27
+#define OPENRELAY2 14
+
+//Up Button
+#define UP 25
+
+//Down Button 
+#define DOWN 26
 
 //define sound speed in cm/uS
 #define SOUND_SPEED 0.034
@@ -41,22 +47,14 @@ void IRAM_ATTR saveDistance(){
 }
 
 void IRAM_ATTR moveActuator(){
-  delay(200); //needs to be changed to millis
+  //delay(200); 
   while(saveddistanceCM > distanceCm){ //turn on first group of relays
-    digitalWrite(upRelay, HIGH);
+    digitalWrite(UPRELAY, HIGH);
   }
 
   while(saveddistanceCM < distanceCm){ //turn on second group of relays
-    digitalWrite(downRelay, HIGH);
+    digitalWrite(DOWNRELAY, HIGH);
   }
-}
-
-void IRAM_ATTR reset(){
-  while(saveddistanceCM < distanceCm && saveddistanceCM != distanceCm){ //turn on second group of relays
-    digitalWrite(downRelay, HIGH);
-  }
-  
-  digitalWrite(downRelay, LOW);
 }
 
 void setup() {
@@ -67,29 +65,53 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE);
   saveddistanceCM = EEPROM.read(0);
   
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-  pinMode(upRelay, OUTPUT);
-  pinMode(downRelay, OUTPUT);
+  pinMode(TRIGPIN, OUTPUT); // Sets the TRIGPIN as an Output
+  pinMode(ECHOPIN, INPUT); // Sets the ECHOPIN as an Input
+ 
+  pinMode(UPRELAY, OUTPUT);
+  pinMode(DOWNRELAY, OUTPUT);
+  pinMode(OPENRELAY1, OUTPUT);
+  pinMode(OPENRELAY2, OUTPUT);
+  pinMode(UP, INPUT_PULLUP);
+  pinMode(DOWN, INPUT_PULLUP);
+  digitalWrite(UPRELAY, HIGH);
+  digitalWrite(DOWNRELAY, HIGH);
   
-  pinMode(buttonPin, INPUT_PULLUP);//Pull up button
-  attachInterrupt(digitalPinToInterrupt(buttonPin), saveDistance, CHANGE); //Save distance interrupt
+  pinMode(BUTTONPIN, INPUT_PULLUP);//Pull up button
+  attachInterrupt(digitalPinToInterrupt(BUTTONPIN), saveDistance, CHANGE); //Save distance interrupt
 
-  pinMode(golocationPin, INPUT_PULLUP); 
-  attachInterrupt(digitalPinToInterrupt(golocationPin), moveActuator, CHANGE); //Save distance interrupt
+  pinMode(GOLOCATIONPIN, INPUT_PULLUP); 
+  attachInterrupt(digitalPinToInterrupt(GOLOCATIONPIN), moveActuator, CHANGE); //Save distance interrupt
 }
 
 void loop() {
-  // Clears the trigPin
-  digitalWrite(trigPin, LOW);
+  if(digitalRead(UP)==HIGH & digitalRead(DOWN)==LOW){ //turn on first group of relays
+    digitalWrite(UPRELAY, HIGH);
+    digitalWrite(DOWNRELAY, LOW);
+    digitalWrite(OPENRELAY1, HIGH);
+    digitalWrite(OPENRELAY2, HIGH);
+  } else if(digitalRead(DOWN)==HIGH & digitalRead(UP)==LOW){
+    digitalWrite(UPRELAY, LOW);
+    digitalWrite(DOWNRELAY, HIGH);
+    digitalWrite(OPENRELAY1, HIGH);
+    digitalWrite(OPENRELAY2, HIGH);
+  } else{
+    digitalWrite(UPRELAY, LOW);
+    digitalWrite(DOWNRELAY, LOW);
+    digitalWrite(OPENRELAY1, LOW);
+    digitalWrite(OPENRELAY2, LOW);
+  }
+
+  // Clears the TRIGPIN
+  digitalWrite(TRIGPIN, LOW);
   delayMicroseconds(2);
-  // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
+  // Sets the TRIGPIN on HIGH state for 10 micro seconds
+  digitalWrite(TRIGPIN, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  digitalWrite(TRIGPIN, LOW);
   
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
+  // Reads the ECHOPIN, returns the sound wave travel time in microseconds
+  duration = pulseIn(ECHOPIN, HIGH);
   
   // Calculate the distance
   distanceCm = duration * SOUND_SPEED/2;
@@ -105,10 +127,10 @@ void loop() {
 
   //stops the actuator from moving
   if(saveddistanceCM != distanceCm || saveddistanceCM > distanceCm){
-    digitalWrite(upRelay, LOW);
+    digitalWrite(UPRELAY, LOW);
   }
   if(saveddistanceCM != distanceCm || saveddistanceCM < distanceCm){
-    digitalWrite(downRelay, LOW);
+    digitalWrite(DOWNRELAY, LOW);
   }
 
   delay(500);
