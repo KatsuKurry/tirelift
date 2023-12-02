@@ -49,11 +49,15 @@ void IRAM_ATTR saveDistance(){
 void IRAM_ATTR moveActuator(){
   //delay(200); 
   while(saveddistanceCM > distanceCm){ //turn on first group of relays
-    digitalWrite(UPRELAY, HIGH);
+    digitalWrite(UPRELAY, LOW);
+    digitalWrite(OPENRELAY1, LOW);
+    digitalWrite(OPENRELAY2, LOW);
   }
 
   while(saveddistanceCM < distanceCm){ //turn on second group of relays
-    digitalWrite(DOWNRELAY, HIGH);
+    digitalWrite(DOWNRELAY, LOW);
+    digitalWrite(OPENRELAY1, LOW);
+    digitalWrite(OPENRELAY2, LOW);
   }
 }
 
@@ -74,8 +78,8 @@ void setup() {
   pinMode(OPENRELAY2, OUTPUT);
   pinMode(UP, INPUT_PULLUP);
   pinMode(DOWN, INPUT_PULLUP);
-  digitalWrite(UPRELAY, HIGH);
-  digitalWrite(DOWNRELAY, HIGH);
+  digitalWrite(UPRELAY, LOW);
+  digitalWrite(DOWNRELAY, LOW);
   
   pinMode(BUTTONPIN, INPUT_PULLUP);//Pull up button
   attachInterrupt(digitalPinToInterrupt(BUTTONPIN), saveDistance, CHANGE); //Save distance interrupt
@@ -85,21 +89,29 @@ void setup() {
 }
 
 void loop() {
+  //stops the actuator from moving
+  if(saveddistanceCM != distanceCm || saveddistanceCM > distanceCm){
+    digitalWrite(UPRELAY, HIGH);
+  }
+  if(saveddistanceCM != distanceCm || saveddistanceCM < distanceCm){
+    digitalWrite(DOWNRELAY, HIGH);
+  }
+
   if(digitalRead(UP)==HIGH & digitalRead(DOWN)==LOW){ //turn on first group of relays
     digitalWrite(UPRELAY, HIGH);
     digitalWrite(DOWNRELAY, LOW);
-    digitalWrite(OPENRELAY1, HIGH);
-    digitalWrite(OPENRELAY2, HIGH);
+    digitalWrite(OPENRELAY1, LOW);
+    digitalWrite(OPENRELAY2, LOW);
   } else if(digitalRead(DOWN)==HIGH & digitalRead(UP)==LOW){
     digitalWrite(UPRELAY, LOW);
     digitalWrite(DOWNRELAY, HIGH);
-    digitalWrite(OPENRELAY1, HIGH);
-    digitalWrite(OPENRELAY2, HIGH);
-  } else{
-    digitalWrite(UPRELAY, LOW);
-    digitalWrite(DOWNRELAY, LOW);
     digitalWrite(OPENRELAY1, LOW);
     digitalWrite(OPENRELAY2, LOW);
+  } else{
+    digitalWrite(UPRELAY, HIGH);
+    digitalWrite(DOWNRELAY, HIGH);
+    digitalWrite(OPENRELAY1, HIGH);
+    digitalWrite(OPENRELAY2, HIGH);
   }
 
   // Clears the TRIGPIN
@@ -124,14 +136,6 @@ void loop() {
   lcd.print("Distance: " + distanceCmPrint);          // print message at the first row
   lcd.setCursor(0, 1);            // move cursor to the second row
   lcd.print("Saved Distance: " + saveddistanceCmPrint); // print message at the second row
-
-  //stops the actuator from moving
-  if(saveddistanceCM != distanceCm || saveddistanceCM > distanceCm){
-    digitalWrite(UPRELAY, LOW);
-  }
-  if(saveddistanceCM != distanceCm || saveddistanceCM < distanceCm){
-    digitalWrite(DOWNRELAY, LOW);
-  }
 
   delay(500);
   lcd.clear();
