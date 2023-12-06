@@ -80,25 +80,25 @@ void IRAM_ATTR moveActuator(){
 }
 
 void setup() {
+  Serial.begin(115200); // Starts the serial communication
+
   lcd.init(); // initialize the lcd
   lcd.backlight();
   
+  //EEPROM to store saved distance
   EEPROM.write(0, saveDistanceCm);
   EEPROM.commit();
-
-  Serial.begin(115200); // Starts the serial communication
   EEPROM.begin(EEPROM_SIZE);
   saveDistanceCm = EEPROM.read(0);
   
   pinMode(TRIGPIN, OUTPUT); // Sets the TRIGPIN as an Output
   pinMode(ECHOPIN, INPUT); // Sets the ECHOPIN as an Input
- 
+
+  //set the relay as output 
   pinMode(UPRELAY, OUTPUT);
   pinMode(DOWNRELAY, OUTPUT);
   pinMode(OPENRELAY1, OUTPUT);
   pinMode(OPENRELAY2, OUTPUT);
-  digitalWrite(UPRELAY, LOW);
-  digitalWrite(DOWNRELAY, LOW);
   
   pinMode(BUTTONPIN, INPUT_PULLUP);//Pull up button
   attachInterrupt(digitalPinToInterrupt(BUTTONPIN), saveDistance, CHANGE); //Save distance interrupt
