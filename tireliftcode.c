@@ -17,6 +17,10 @@
 //Relay Pins(Down)
 #define DOWNRELAY 2
 
+//up/down pins
+#define UP 25
+#define DOWN 26
+
 //To control the relays turned on and off on the module
 #define OPENRELAY1 27
 #define OPENRELAY2 14
@@ -96,8 +100,8 @@ void setup() {
   pinMode(DOWNRELAY, OUTPUT);
   pinMode(OPENRELAY1, OUTPUT);
   pinMode(OPENRELAY2, OUTPUT);
-  pinMode(UP, INPUT_PULLUP);
-  pinMode(DOWN, INPUT_PULLUP);
+  //pinMode(UP, INPUT_PULLUP);
+  //pinMode(DOWN, INPUT_PULLUP);
   digitalWrite(UPRELAY, LOW);
   digitalWrite(DOWNRELAY, LOW);
   
@@ -109,22 +113,11 @@ void setup() {
 }
 
 void loop() {
-  if(digitalRead(UP)==HIGH & digitalRead(DOWN)==LOW){ //turn on first group of relays
-    digitalWrite(UPRELAY, HIGH);
-    digitalWrite(DOWNRELAY, LOW);
-    digitalWrite(OPENRELAY1, LOW);
-    digitalWrite(OPENRELAY2, LOW);
-  } else if(digitalRead(DOWN)==HIGH & digitalRead(UP)==LOW){
-    digitalWrite(UPRELAY, LOW);
-    digitalWrite(DOWNRELAY, HIGH);
-    digitalWrite(OPENRELAY1, LOW);
-    digitalWrite(OPENRELAY2, LOW);
-  } else{
-    digitalWrite(UPRELAY, HIGH);
-    digitalWrite(DOWNRELAY, HIGH);
-    digitalWrite(OPENRELAY1, HIGH);
-    digitalWrite(OPENRELAY2, HIGH);
-  }
+  //relay is turned off initially
+  digitalWrite(UPRELAY, HIGH);
+  digitalWrite(DOWNRELAY, HIGH);
+  digitalWrite(OPENRELAY1, HIGH);
+  digitalWrite(OPENRELAY2, HIGH);
 
   // Clears the TRIGPIN
   digitalWrite(TRIGPIN, LOW);
@@ -151,4 +144,4 @@ void loop() {
 
   delay(500);
   lcd.clear();
-  
+}
