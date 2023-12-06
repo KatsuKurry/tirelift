@@ -25,6 +25,12 @@
 #define OPENRELAY1 27
 #define OPENRELAY2 14
 
+//Up Button
+#define UP 25
+
+//Down Button 
+#define DOWN 26
+
 //define sound speed in cm/uS
 #define SOUND_SPEED 0.034
 
@@ -48,37 +54,35 @@ void IRAM_ATTR moveActuator(){
   bool flag = false;
 
   delay(100); 
-  while(digitalRead(GOLOCATIONPIN)==LOW & digitalRead(BUTTONPIN)==HIGH){
-    while(saveddistanceCM != distanceCm & saveddistanceCM > distanceCm){ //turn on first group of relays
-      digitalWrite(UPRELAY, LOW);
-      digitalWrite(DOWNRELAY, HIGH);
-      digitalWrite(OPENRELAY1, LOW);
-      digitalWrite(OPENRELAY2, LOW);
+  while(saveddistanceCM != distanceCm & saveddistanceCM > distanceCm){ //turn on first group of relays
+    digitalWrite(UPRELAY, LOW);
+    digitalWrite(DOWNRELAY, HIGH);
+    digitalWrite(OPENRELAY1, LOW);
+    digitalWrite(OPENRELAY2, LOW);
 
-      if(saveddistanceCM == distanceCm){
-        flag = true;
-        break;
-      }
+    if(saveddistanceCM == distanceCm){
+      flag = true;
+      break;
     }
+  }
 
-    while(saveddistanceCM != distanceCm & saveddistanceCM < distanceCm){ //turn on second group of relays
-      digitalWrite(DOWNRELAY, LOW);
-      digitalWrite(UPRELAY, HIGH);
-      digitalWrite(OPENRELAY1, LOW);
-      digitalWrite(OPENRELAY2, LOW);
+  while(saveddistanceCM != distanceCm & saveddistanceCM < distanceCm){ //turn on second group of relays
+    digitalWrite(DOWNRELAY, LOW);
+    digitalWrite(UPRELAY, HIGH);
+    digitalWrite(OPENRELAY1, LOW);
+    digitalWrite(OPENRELAY2, LOW);
 
-      if(saveddistanceCM == distanceCm){
-        flag = true;
-        break;
-      }
+    if(saveddistanceCM == distanceCm){
+      flag = true;
+      break;
     }
+  }
 
-    if(flag){
-      digitalWrite(UPRELAY, HIGH);
-      digitalWrite(DOWNRELAY, HIGH);
-      digitalWrite(OPENRELAY1, HIGH);
-      digitalWrite(OPENRELAY2, HIGH);
-    }
+  if(flag){
+    digitalWrite(UPRELAY, HIGH);
+    digitalWrite(DOWNRELAY, HIGH);
+    digitalWrite(OPENRELAY1, HIGH);
+    digitalWrite(OPENRELAY2, HIGH);
   }
 }
 
