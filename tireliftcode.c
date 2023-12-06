@@ -47,17 +47,38 @@ void IRAM_ATTR saveDistance(){
 }
 
 void IRAM_ATTR moveActuator(){
-  //delay(200); 
-  while(saveddistanceCM > distanceCm){ //turn on first group of relays
+  bool flag = false;
+
+  delay(100); 
+  while(saveddistanceCM != distanceCm & saveddistanceCM > distanceCm){ //turn on first group of relays
     digitalWrite(UPRELAY, LOW);
+    digitalWrite(DOWNRELAY, HIGH);
     digitalWrite(OPENRELAY1, LOW);
     digitalWrite(OPENRELAY2, LOW);
+
+    if(saveddistanceCM == distanceCm){
+      flag = true;
+      break;
+    }
   }
 
-  while(saveddistanceCM < distanceCm){ //turn on second group of relays
+  while(saveddistanceCM != distanceCm & saveddistanceCM < distanceCm){ //turn on second group of relays
     digitalWrite(DOWNRELAY, LOW);
+    digitalWrite(UPRELAY, HIGH);
     digitalWrite(OPENRELAY1, LOW);
     digitalWrite(OPENRELAY2, LOW);
+
+    if(saveddistanceCM == distanceCm){
+      flag = true;
+      break;
+    }
+  }
+
+  if(flag){
+    digitalWrite(UPRELAY, HIGH);
+    digitalWrite(DOWNRELAY, HIGH);
+    digitalWrite(OPENRELAY1, HIGH);
+    digitalWrite(OPENRELAY2, HIGH);
   }
 }
 
@@ -65,6 +86,9 @@ void setup() {
   lcd.init(); // initialize the lcd
   lcd.backlight();
   
+  EEPROM.write(0, saveddistanceCM);
+  EEPROM.commit();
+
   Serial.begin(115200); // Starts the serial communication
   EEPROM.begin(EEPROM_SIZE);
   saveddistanceCM = EEPROM.read(0);
@@ -85,18 +109,10 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(BUTTONPIN), saveDistance, CHANGE); //Save distance interrupt
 
   pinMode(GOLOCATIONPIN, INPUT_PULLUP); 
-  attachInterrupt(digitalPinToInterrupt(GOLOCATIONPIN), moveActuator, CHANGE); //Save distance interrupt
+  attachInterrupt(digitalPinToInterrupt(GOLOCATIONPIN), moveActuator, FALLING); //Save distance interrupt
 }
 
 void loop() {
-  //stops the actuator from moving
-  if(saveddistanceCM != distanceCm || saveddistanceCM > distanceCm){
-    digitalWrite(UPRELAY, HIGH);
-  }
-  if(saveddistanceCM != distanceCm || saveddistanceCM < distanceCm){
-    digitalWrite(DOWNRELAY, HIGH);
-  }
-
   if(digitalRead(UP)==HIGH & digitalRead(DOWN)==LOW){ //turn on first group of relays
     digitalWrite(UPRELAY, HIGH);
     digitalWrite(DOWNRELAY, LOW);
