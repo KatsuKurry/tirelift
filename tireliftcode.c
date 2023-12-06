@@ -17,19 +17,9 @@
 //Relay Pins(Down)
 #define DOWNRELAY 2
 
-//up/down pins
-#define UP 25
-#define DOWN 26
-
 //To control the relays turned on and off on the module
 #define OPENRELAY1 27
 #define OPENRELAY2 14
-
-//Up Button
-#define UP 25
-
-//Down Button 
-#define DOWN 26
 
 //define sound speed in cm/uS
 #define SOUND_SPEED 0.034
@@ -40,49 +30,52 @@
 //mutatable variables
 long duration;
 int distanceCm = 0;
-int saveddistanceCM = 0;
+int saveDistanceCm = 0;
 
 LiquidCrystal_I2C lcd(0x27, 20, 4); // I2C address 0x27, 20 column and 4 rows
 
 void IRAM_ATTR saveDistance(){
-  saveddistanceCM = distanceCm;
-  EEPROM.write(0, saveddistanceCM);
+  delay(500);
+  saveDistanceCm = distanceCm;
+  EEPROM.write(0, saveDistanceCm);
   EEPROM.commit();
 }
 
 void IRAM_ATTR moveActuator(){
   bool flag = false;
 
-  delay(100); 
-  while(saveddistanceCM != distanceCm & saveddistanceCM > distanceCm){ //turn on first group of relays
-    digitalWrite(UPRELAY, LOW);
-    digitalWrite(DOWNRELAY, HIGH);
-    digitalWrite(OPENRELAY1, LOW);
-    digitalWrite(OPENRELAY2, LOW);
+  delay(500); 
+  while(digitalRead(GOLOCATIONPIN)==LOW & digitalRead(BUTTONPIN)==HIGH){
+    while(saveDistanceCm != distanceCm & saveDistanceCm > distanceCm){ //turn on first group of relays
+      digitalWrite(UPRELAY, LOW);
+      digitalWrite(DOWNRELAY, HIGH);
+      digitalWrite(OPENRELAY1, LOW);
+      digitalWrite(OPENRELAY2, LOW);
 
-    if(saveddistanceCM == distanceCm){
-      flag = true;
-      break;
+      if(saveDistanceCm == distanceCm){
+        flag = true;
+        break;
+      }
     }
-  }
 
-  while(saveddistanceCM != distanceCm & saveddistanceCM < distanceCm){ //turn on second group of relays
-    digitalWrite(DOWNRELAY, LOW);
-    digitalWrite(UPRELAY, HIGH);
-    digitalWrite(OPENRELAY1, LOW);
-    digitalWrite(OPENRELAY2, LOW);
+    while(saveDistanceCm != distanceCm & saveDistanceCm < distanceCm){ //turn on second group of relays
+      digitalWrite(DOWNRELAY, LOW);
+      digitalWrite(UPRELAY, HIGH);
+      digitalWrite(OPENRELAY1, LOW);
+      digitalWrite(OPENRELAY2, LOW);
 
-    if(saveddistanceCM == distanceCm){
-      flag = true;
-      break;
+      if(saveDistanceCm == distanceCm){
+        flag = true;
+        break;
+      }
     }
-  }
 
-  if(flag){
-    digitalWrite(UPRELAY, HIGH);
-    digitalWrite(DOWNRELAY, HIGH);
-    digitalWrite(OPENRELAY1, HIGH);
-    digitalWrite(OPENRELAY2, HIGH);
+    if(flag){
+      digitalWrite(UPRELAY, HIGH);
+      digitalWrite(DOWNRELAY, HIGH);
+      digitalWrite(OPENRELAY1, HIGH);
+      digitalWrite(OPENRELAY2, HIGH);
+    }
   }
 }
 
@@ -90,12 +83,12 @@ void setup() {
   lcd.init(); // initialize the lcd
   lcd.backlight();
   
-  EEPROM.write(0, saveddistanceCM);
+  EEPROM.write(0, saveDistanceCm);
   EEPROM.commit();
 
   Serial.begin(115200); // Starts the serial communication
   EEPROM.begin(EEPROM_SIZE);
-  saveddistanceCM = EEPROM.read(0);
+  saveDistanceCm = EEPROM.read(0);
   
   pinMode(TRIGPIN, OUTPUT); // Sets the TRIGPIN as an Output
   pinMode(ECHOPIN, INPUT); // Sets the ECHOPIN as an Input
@@ -104,8 +97,6 @@ void setup() {
   pinMode(DOWNRELAY, OUTPUT);
   pinMode(OPENRELAY1, OUTPUT);
   pinMode(OPENRELAY2, OUTPUT);
-  //pinMode(UP, INPUT_PULLUP);
-  //pinMode(DOWN, INPUT_PULLUP);
   digitalWrite(UPRELAY, LOW);
   digitalWrite(DOWNRELAY, LOW);
   
@@ -117,7 +108,7 @@ void setup() {
 }
 
 void loop() {
-  //relay is turned off initially
+  //relays initially off
   digitalWrite(UPRELAY, HIGH);
   digitalWrite(DOWNRELAY, HIGH);
   digitalWrite(OPENRELAY1, HIGH);
@@ -138,7 +129,7 @@ void loop() {
   distanceCm = duration * SOUND_SPEED/2;
 
   String distanceCmPrint = String(distanceCm);
-  String saveddistanceCmPrint = String(saveddistanceCM);
+  String saveddistanceCmPrint = String(saveDistanceCm);
 
   // Prints the distance in the LCD
   lcd.setCursor(0, 0);            // move cursor the first row
