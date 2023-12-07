@@ -45,7 +45,7 @@ void IRAM_ATTR moveActuator(){
   bool flag = false;
 
   delay(500); 
-  while(digitalRead(GOLOCATIONPIN)==LOW & digitalRead(BUTTONPIN)==HIGH){
+  while(digitalRead(GOLOCATIONPIN) == LOW & digitalRead(BUTTONPIN) == HIGH){
     while(saveDistanceCm != distanceCm & saveDistanceCm > distanceCm){ //turn on first group of relays
       digitalWrite(UPRELAY, LOW);
       digitalWrite(DOWNRELAY, HIGH);
