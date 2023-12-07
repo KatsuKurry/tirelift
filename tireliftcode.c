@@ -70,6 +70,7 @@ void IRAM_ATTR moveActuator(){
       }
     }
 
+    //turns off the relay
     if(flag){
       digitalWrite(UPRELAY, HIGH);
       digitalWrite(DOWNRELAY, HIGH);
