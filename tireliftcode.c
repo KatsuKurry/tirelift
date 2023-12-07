@@ -6,7 +6,7 @@
 #define ECHOPIN 18
 
 //Height Button Save
-#define BUTTONPIN 17
+#define SAVEBUTTON 17
 
 //go to distance
 #define GOLOCATIONPIN 15
@@ -30,22 +30,24 @@
 //mutatable variables
 long duration;
 int distanceCm = 0;
-int saveDistanceCm = 0;
+int saveDistanceCm = 15;
 
 LiquidCrystal_I2C lcd(0x27, 20, 4); // I2C address 0x27, 20 column and 4 rows
 
 void IRAM_ATTR saveDistance(){
   delay(500);
-  saveDistanceCm = distanceCm;
-  EEPROM.write(0, saveDistanceCm);
-  EEPROM.commit();
+  if(digitalRead(SAVEBUTTON)==LOW){
+    saveDistanceCm = distanceCm;
+    EEPROM.write(0, saveDistanceCm);
+    EEPROM.commit();
+  }
 }
 
 void IRAM_ATTR moveActuator(){
   bool flag = false;
 
   delay(500); 
-  while(digitalRead(GOLOCATIONPIN) == LOW & digitalRead(BUTTONPIN) == HIGH){
+  while(digitalRead(GOLOCATIONPIN) == LOW & digitalRead(SAVEBUTTON) == HIGH){
     while(saveDistanceCm != distanceCm & saveDistanceCm > distanceCm){ //turn on first group of relays
       digitalWrite(UPRELAY, LOW);
       digitalWrite(DOWNRELAY, HIGH);
@@ -101,8 +103,8 @@ void setup() {
   pinMode(OPENRELAY1, OUTPUT);
   pinMode(OPENRELAY2, OUTPUT);
   
-  pinMode(BUTTONPIN, INPUT_PULLUP);//Pull up button
-  attachInterrupt(digitalPinToInterrupt(BUTTONPIN), saveDistance, CHANGE); //Save distance interrupt
+  pinMode(SAVEBUTTON, INPUT_PULLUP);//Pull up button
+  attachInterrupt(digitalPinToInterrupt(SAVEBUTTON), saveDistance, CHANGE); //Save distance interrupt
 
   pinMode(GOLOCATIONPIN, INPUT_PULLUP); 
   attachInterrupt(digitalPinToInterrupt(GOLOCATIONPIN), moveActuator, FALLING); //Save distance interrupt
